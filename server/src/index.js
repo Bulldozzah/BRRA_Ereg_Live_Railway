@@ -26,7 +26,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+// Railway (and most PaaS) route the public domain to port 8080 by default and
+// do not always inject PORT, so 8080 is the right production fallback.
+// Local development sets PORT=3001 explicitly in server/.env.
+const PORT = process.env.PORT || 8080;
 
 // CORS: merge Railway/local env with defaults so production frontend still works if CORS_ORIGIN is wrong/missing.
 const DEFAULT_CORS_ORIGINS = [
