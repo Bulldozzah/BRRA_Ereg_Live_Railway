@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import fs from 'fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import pool from './db.js';
 import licensesRouter from './routes/licenses.js';
@@ -19,7 +21,9 @@ import licenseAdminRouter from './routes/license-admin.js';
 import usersRouter from './routes/users.js';
 import statsRouter from './routes/stats.js';
 
-dotenv.config();
+// Resolve .env relative to this file, not the working directory (see db.js).
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const app = express();
 const PORT = process.env.PORT || 3001;

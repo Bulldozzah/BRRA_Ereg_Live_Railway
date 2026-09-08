@@ -1,7 +1,12 @@
 import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-dotenv.config();
+// Resolve .env relative to this file, not the working directory, so the server
+// loads server/.env no matter which directory it is started from.
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 function parseMysqlUrl(url) {
   if (!url) return null;

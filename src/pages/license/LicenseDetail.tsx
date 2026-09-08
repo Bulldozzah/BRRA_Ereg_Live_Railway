@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useLicense } from "@/hooks/use-licenses";
-import { api } from "@/services/api";
+import { api, API_BASE_URL } from "@/services/api";
 import {
   Calendar, Clock, Coins, MapPin, Building2, FileDown, Printer,
   ExternalLink, ArrowLeft, CheckCircle2, Loader2, Mail, Phone,
@@ -57,10 +57,9 @@ const LicenseDetail = () => {
   const trackClick = useCallback((url: string) => {
     if (!lic) return;
     const payload = { license_id: lic.id, license_name: lic.name, agency_id: lic.agency_id, url };
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
     try {
       navigator.sendBeacon(
-        `${baseUrl}/link-clicks`,
+        `${API_BASE_URL}/link-clicks`,
         new Blob([JSON.stringify(payload)], { type: 'application/json' })
       );
     } catch (e) {

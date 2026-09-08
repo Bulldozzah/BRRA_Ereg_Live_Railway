@@ -1,6 +1,13 @@
 import type { ApiResponse, PaginatedResponse } from '@/types/database';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://cooperative-respect-production-3d40.up.railway.app/api';
+const DEV_API_BASE_URL = 'http://localhost:3001/api';
+const PROD_API_BASE_URL = 'https://cooperative-respect-production-3d40.up.railway.app/api';
+
+// Fall back per-environment so a dev build never silently talks to production
+// when VITE_API_BASE_URL is missing. Set VITE_API_BASE_URL to override either.
+export const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.DEV ? DEV_API_BASE_URL : PROD_API_BASE_URL);
 
 class ApiClient {
   private baseUrl: string;
