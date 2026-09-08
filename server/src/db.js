@@ -30,17 +30,24 @@ const connString =
   {};
 
 const config = {
-  host: connString.host || process.env.DB_HOST || process.env.MYSQLHOST || 'localhost',
-  port: connString.port || parseInt(process.env.DB_PORT || process.env.MYSQLPORT || '3306'),
-  user: connString.user || process.env.DB_USER || process.env.MYSQLUSER || 'root',
-  password: connString.password || process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || '',
-  database: connString.database || process.env.DB_NAME || process.env.MYSQLDATABASE || 'zambiaeregistry',
+  host: connString.host || process.env.MYSQLHOST || process.env.DB_HOST,
+  port: connString.port || parseInt(process.env.MYSQLPORT || process.env.DB_PORT || '3306', 10),
+  user: connString.user || process.env.MYSQLUSER || process.env.DB_USER || 'root',
+  password: connString.password || process.env.MYSQLPASSWORD || process.env.DB_PASSWORD || '',
+  database: connString.database || process.env.MYSQLDATABASE || process.env.DB_NAME || 'zambiaeregistry',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
   enableKeepAlive: true,
   keepAliveInitialDelay: 0,
 };
+
+if (!config.host) {
+  console.error(
+    '[db.js] No MySQL host configured. Set MYSQL_URL or MYSQLHOST (via Railway reference variables ' +
+    'from the linked MySQL service), or DB_HOST for local development. Refusing to default to localhost.'
+  );
+}
 
 console.log('[db.js] DB config:', {
   host: config.host,

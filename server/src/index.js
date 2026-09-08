@@ -26,10 +26,22 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const app = express();
-// Railway (and most PaaS) route the public domain to port 8080 by default and
-// do not always inject PORT, so 8080 is the right production fallback.
-// Local development sets PORT=3001 explicitly in server/.env.
-const PORT = process.env.PORT || 8080;
+// Railway injects PORT for the service and routes external traffic to it.
+// Always trust process.env.PORT when present; only fall back to 8080 (the
+// port Railway routes the public domain to) when PORT is unset or unusable.
+// NOTE: never hardcode a DB port (e.g. 3306/5432) here — those belong to the
+// separate MySQL service, not this API's HTTP listener.
+const parsedPort = parseInt(process.env.PORT, 10);
+const PORT = Number.isFinite(parsedPort) && parsedPort > 0 ? parsedPort : 8080;
+console.log(`[index.js] Using PORT=${PORT} (from ${process.env.PORT ? 'process.env.PORT' : 'default 8080'})`);
+
+// Ensure the process doesn't die silently without logging why
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught exception:', err);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled promise rejection:', reason);
+});
 
 // CORS: merge Railway/local env with defaults so production frontend still works if CORS_ORIGIN is wrong/missing.
 const DEFAULT_CORS_ORIGINS = [
@@ -254,4 +266,5 @@ app.use((err, req, res, _next) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`eRegistry API server running on http://0.0.0.0:${PORT}`);
   console.log(`Health check: http://0.0.0.0:${PORT}/api/health`);
+  console.log('Server running on port', PORT);
 });
