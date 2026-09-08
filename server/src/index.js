@@ -30,6 +30,7 @@ const PORT = process.env.PORT || 3001;
 
 // CORS: merge Railway/local env with defaults so production frontend still works if CORS_ORIGIN is wrong/missing.
 const DEFAULT_CORS_ORIGINS = [
+  'https://brraeregliverailway-production.up.railway.app',
   'https://zambia-business-hub-production.up.railway.app',
   'http://localhost:5173',
   'http://localhost:8080',

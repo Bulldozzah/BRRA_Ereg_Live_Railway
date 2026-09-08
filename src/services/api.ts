@@ -1,10 +1,14 @@
 import type { ApiResponse, PaginatedResponse } from '@/types/database';
 
+// In dev, Vite (:8080) and the API (:3001) are separate origins, so the API
+// needs an absolute URL. In production the Express server serves both this
+// bundle and /api from the same origin, so a relative path is correct and
+// avoids hardcoding a deployment URL (and avoids CORS entirely).
 const DEV_API_BASE_URL = 'http://localhost:3001/api';
-const PROD_API_BASE_URL = 'https://cooperative-respect-production-3d40.up.railway.app/api';
+const PROD_API_BASE_URL = '/api';
 
-// Fall back per-environment so a dev build never silently talks to production
-// when VITE_API_BASE_URL is missing. Set VITE_API_BASE_URL to override either.
+// Set VITE_API_BASE_URL to override, e.g. when hosting the frontend and the
+// API on different domains.
 export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
   (import.meta.env.DEV ? DEV_API_BASE_URL : PROD_API_BASE_URL);

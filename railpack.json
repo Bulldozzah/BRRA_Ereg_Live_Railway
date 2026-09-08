@@ -1,6 +1,9 @@
 {
   "$schema": "https://schema.railpack.com",
   "build": {
-    "cmd": "npm install && npm run build"
+    "cmd": "npm install && npm install --prefix server && npm run build"
+  },
+  "deploy": {
+    "startCommand": "npm start"
   }
 }
