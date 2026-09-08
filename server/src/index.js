@@ -114,6 +114,15 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
+// Names only of any database-ish environment variables present, so a
+// misnamed or wrongly-scoped reference variable is visible without ever
+// exposing a value. Never return the values themselves.
+function dbEnvVarNames() {
+  return Object.keys(process.env)
+    .filter((k) => /mysql|maria|database|^db_|^pg|postgres/i.test(k))
+    .sort();
+}
+
 // DB diagnostic endpoint — returns full error details to aid debugging
 app.get('/api/db-test', async (req, res) => {
   const startMs = Date.now();
@@ -136,6 +145,7 @@ app.get('/api/db-test', async (req, res) => {
         mysql_url_set: !!process.env.MYSQL_URL,
         mysql_public_url_set: !!process.env.MYSQL_PUBLIC_URL,
       },
+      db_env_var_names: dbEnvVarNames(),
     });
   } catch (err) {
     const elapsed = Date.now() - startMs;
@@ -164,6 +174,7 @@ app.get('/api/db-test', async (req, res) => {
         mysql_url_set: !!process.env.MYSQL_URL,
         mysql_public_url_set: !!process.env.MYSQL_PUBLIC_URL,
       },
+      db_env_var_names: dbEnvVarNames(),
     });
   } finally {
     if (conn) conn.release();
