@@ -1,0 +1,142 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* eRegistry Zambia — Gold / Deep Blue / Sky theme.
+   Primary: Blue #010062  |  Accent: Gold #cb9b2d  |  Pop: Sky #00d0fe
+   All colors MUST be HSL. */
+
+@layer base {
+  :root {
+    /* shadcn/ui semantic tokens — Light mode */
+    --background: 42 30% 97%;            /* warm ivory */
+    --foreground: 241 60% 12%;           /* deep navy ink */
+
+    --card: 0 0% 100%;
+    --card-foreground: 241 60% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 241 60% 12%;
+
+    --primary: 241 100% 19%;             /* deep blue #010062 */
+    --primary-foreground: 42 30% 97%;
+    --primary-hover: 241 100% 15%;
+    --primary-deep: 241 100% 12%;
+
+    --secondary: 42 30% 94%;
+    --secondary-foreground: 241 60% 12%;
+
+    --muted: 42 20% 94%;
+    --muted-foreground: 241 20% 45%;
+
+    --accent: 42 64% 49%;                /* gold #cb9b2d */
+    --accent-foreground: 42 30% 97%;
+
+    --destructive: 0 72% 48%;
+    --destructive-foreground: 42 30% 97%;
+
+    --border: 42 15% 88%;
+    --input: 42 15% 88%;
+    --ring: 241 100% 19%;
+
+    /* Legacy aliases remapped to gold/blue/sky */
+    --earth-800: 241 70% 14%;
+    --earth-900: 241 80% 10%;
+    --sand-50: 42 30% 97%;
+    --sand-100: 42 25% 94%;
+    --sand-200: 42 20% 88%;
+    --copper-50: 42 60% 95%;
+    --copper-100: 42 55% 92%;
+    --copper-500: 42 64% 49%;
+    --copper-600: 42 70% 40%;
+    --copper-900: 42 85% 16%;
+
+    /* Gold scale */
+    --gold-50:  42 60% 95%;
+    --gold-100: 42 55% 92%;
+    --gold-200: 42 50% 85%;
+    --gold-300: 42 55% 75%;
+    --gold-400: 42 60% 65%;
+    --gold-500: 42 64% 49%;
+    --gold-600: 42 70% 40%;
+    --gold-700: 42 75% 32%;
+    --gold-800: 42 80% 24%;
+    --gold-900: 42 85% 16%;
+
+    /* Blue scale */
+    --blue-50:  241 40% 95%;
+    --blue-100: 241 50% 90%;
+    --blue-200: 241 60% 82%;
+    --blue-300: 241 70% 72%;
+    --blue-400: 241 85% 55%;
+    --blue-500: 241 100% 19%;
+    --blue-600: 241 100% 15%;
+    --blue-700: 241 100% 12%;
+    --blue-800: 241 100% 10%;
+    --blue-900: 241 100% 7%;
+
+    /* Sky scale */
+    --sky-50:  191 100% 95%;
+    --sky-100: 191 100% 90%;
+    --sky-200: 191 100% 82%;
+    --sky-300: 191 100% 72%;
+    --sky-400: 191 100% 62%;
+    --sky-500: 191 100% 50%;
+    --sky-600: 191 100% 42%;
+    --sky-700: 191 100% 34%;
+    --sky-800: 191 100% 26%;
+    --sky-900: 191 100% 18%;
+
+    --radius: 0.75rem;
+
+    --shadow-soft: 0 4px 24px -8px hsl(241 60% 12% / 0.06);
+    --shadow-card: 0 18px 48px -16px hsl(241 60% 12% / 0.18);
+
+    --sidebar-background: 42 25% 94%;
+    --sidebar-foreground: 241 60% 12%;
+    --sidebar-primary: 241 100% 19%;
+    --sidebar-primary-foreground: 42 30% 97%;
+    --sidebar-accent: 42 18% 92%;
+    --sidebar-accent-foreground: 241 60% 12%;
+    --sidebar-border: 42 15% 88%;
+    --sidebar-ring: 241 100% 19%;
+  }
+
+  .dark {
+    --background: 241 60% 7%;
+    --foreground: 42 30% 96%;
+
+    --card: 241 50% 10%;
+    --card-foreground: 42 30% 96%;
+
+    --popover: 241 50% 10%;
+    --popover-foreground: 42 30% 96%;
+
+    --primary: 241 80% 55%;
+    --primary-foreground: 241 60% 7%;
+    --secondary: 241 30% 14%;
+    --secondary-foreground: 42 30% 96%;
+    --muted: 241 30% 14%;
+    --muted-foreground: 42 20% 70%;
+    --accent: 42 70% 55%;
+    --accent-foreground: 241 60% 7%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 42 30% 96%;
+    --border: 241 30% 18%;
+    --input: 241 30% 18%;
+    --ring: 241 80% 55%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  html { font-family: 'Inter', system-ui, sans-serif; font-feature-settings: 'ss01', 'cv11'; }
+  body { @apply bg-background text-foreground antialiased; }
+  .font-serif { font-family: 'Outfit', 'Inter', system-ui, sans-serif; font-weight: 700; letter-spacing: -0.02em; }
+}
+
+@layer components {
+  .container-page { @apply max-w-[1440px] mx-auto px-6 md:px-8; }
+}

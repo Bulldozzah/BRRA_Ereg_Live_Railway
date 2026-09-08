@@ -1,0 +1,184 @@
+{
+  "version": 1,
+  "sdk_version": "0.23.0",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "none"
+  },
+  "mcp": {
+    "server": {
+      "name": "zambia-eregistry-mcp",
+      "version": "0.1.0",
+      "title": "Zambia eRegistry"
+    },
+    "tools": [
+      {
+        "name": "search_licenses",
+        "title": "Search business licenses",
+        "description": "Search Zambia business licenses by keyword. Matches license name, description, keywords, purpose, and requirements. Returns a paginated list with basic license info.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Free-text search term (e.g. 'mining', 'restaurant', 'import')."
+            },
+            "page": {
+              "description": "Page number, defaults to 1.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            },
+            "limit": {
+              "description": "Results per page (1-50), defaults to 20.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          },
+          "required": [
+            "query"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_license",
+        "title": "Get license details",
+        "description": "Retrieve the full details of a single Zambia business license by its numeric ID, including issuing agency, jurisdiction, fees, processing time, and requirements.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "description": "Numeric license ID."
+            }
+          },
+          "required": [
+            "id"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_agencies",
+        "title": "List issuing agencies",
+        "description": "List Zambian government agencies that issue business licenses. Optional keyword filter matches agency name.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "query": {
+              "description": "Optional keyword filter.",
+              "type": "string",
+              "minLength": 1
+            },
+            "page": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_regulations",
+        "title": "List regulations (Notice & Comment)",
+        "description": "List published regulations open for public notice and comment, with title, agency, and closing date.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "query": {
+              "description": "Optional keyword filter.",
+              "type": "string",
+              "minLength": 1
+            },
+            "page": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_taxonomies",
+        "title": "List reference taxonomies",
+        "description": "List reference taxonomy items used to categorize licenses: jurisdictions (locations), industries, business types, or activities.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "jurisdictions",
+                "industries",
+                "business_types",
+                "activities"
+              ],
+              "description": "Which taxonomy to list."
+            },
+            "query": {
+              "description": "Optional keyword filter.",
+              "type": "string",
+              "minLength": 1
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          "required": [
+            "kind"
+          ]
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
