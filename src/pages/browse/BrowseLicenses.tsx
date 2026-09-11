@@ -8,6 +8,7 @@ import { useAgencies } from "@/hooks/use-agencies";
 import { useLocations } from "@/hooks/use-locations";
 import { useIndustries } from "@/hooks/use-industries";
 import { useBusinessTypes } from "@/hooks/use-businesstypes";
+import { AdvancedLicenseSearch, type AdvancedSearchValues } from "@/components/search/AdvancedLicenseSearch";
 
 const PAGE_SIZE = 10;
 
@@ -42,14 +43,15 @@ const FilterDropdown = ({
 
 export const BrowseLicenses = () => {
   const { slug, id } = useParams();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [q, setQ] = useState("");
-  const [debouncedQ, setDebouncedQ] = useState("");
+  const [q, setQ] = useState(searchParams.get("q") || "");
+  const [debouncedQ, setDebouncedQ] = useState(searchParams.get("q") || "");
   const [selectedAgencyId, setSelectedAgencyId] = useState<string>("");
-  const [selectedLocationId, setSelectedLocationId] = useState<string>("");
+  const [selectedLocationId, setSelectedLocationId] = useState<string>(searchParams.get("location_id") || "");
   const [selectedIndustryId, setSelectedIndustryId] = useState<string>(searchParams.get("industry_id") || "");
-  const [selectedBusinessTypeId, setSelectedBusinessTypeId] = useState<string>(searchParams.get("business_type_id") || "");
+  const [selectedBusinessTypeId, setSelectedBusinessTypeId] = useState<string>(searchParams.get("business_type_id") || id || "");
+  const [selectedActivityIds, setSelectedActivityIds] = useState<string>(searchParams.get("activity_ids") || "");
   const [page, setPage] = useState(1);
 
   // Debounce search
@@ -61,10 +63,12 @@ export const BrowseLicenses = () => {
   };
 
   // Fetch filter options
-  const { data: agenciesData } = useAgencies({ per_page: 100 });
-  const { data: locationsData } = useLocations({ per_page: 100 });
-  const { data: industriesData } = useIndustries({ per_page: 100 });
-  const { data: businessTypesData } = useBusinessTypes({ per_page: 100 });
+  // per_page must exceed the row counts of these reference tables (114 jurisdictions,
+  // 109 business types) or the dropdowns silently drop options.
+  const { data: agenciesData } = useAgencies({ per_page: 500, order_by: 'name', order_dir: 'ASC' });
+  const { data: locationsData } = useLocations({ per_page: 500, order_by: 'name', order_dir: 'ASC' });
+  const { data: industriesData } = useIndustries({ per_page: 500, order_by: 'name', order_dir: 'ASC' });
+  const { data: businessTypesData } = useBusinessTypes({ per_page: 500, order_by: 'name', order_dir: 'ASC' });
 
   const agenciesList = agenciesData?.data ?? [];
   const locationsList = locationsData?.data ?? [];
@@ -79,12 +83,34 @@ export const BrowseLicenses = () => {
     }
   }, [initialAgency]);
 
-  // Set initial business type filter from URL :id param (e.g. /browse/business-types/licenses/:id)
+  // Keep filters in sync with the URL so searches arriving from elsewhere (the homepage
+  // keyword search and advanced search) and browser back/forward navigation both show
+  // the right results. The :id route param covers /browse/business-types/licenses/:id.
+  const urlQ = searchParams.get("q") || "";
+  const urlLocation = searchParams.get("location_id") || "";
+  const urlIndustry = searchParams.get("industry_id") || "";
+  const urlBusinessType = searchParams.get("business_type_id") || id || "";
+  const urlActivities = searchParams.get("activity_ids") || "";
   useEffect(() => {
-    if (id && !selectedBusinessTypeId) {
-      setSelectedBusinessTypeId(id);
+    setQ(urlQ);
+    setDebouncedQ(urlQ);
+    setSelectedLocationId(urlLocation);
+    setSelectedIndustryId(urlIndustry);
+    setSelectedBusinessTypeId(urlBusinessType);
+    setSelectedActivityIds(urlActivities);
+    setPage(1);
+  }, [urlQ, urlLocation, urlIndustry, urlBusinessType, urlActivities]);
+
+  // The advanced search writes to the query string; the effect above then syncs state,
+  // keeping the URL the single source of truth so results stay shareable.
+  const applyAdvancedSearch = (values: AdvancedSearchValues) => {
+    const next = new URLSearchParams(searchParams);
+    for (const [key, value] of Object.entries(values)) {
+      if (value) next.set(key, value);
+      else next.delete(key);
     }
-  }, [id]);
+    setSearchParams(next);
+  };
 
   // Fetch licenses with server-side pagination
   const { data: licensesData, isLoading } = useLicenses({
@@ -95,6 +121,7 @@ export const BrowseLicenses = () => {
     location_id: selectedLocationId ? Number(selectedLocationId) : undefined,
     industry_id: selectedIndustryId ? Number(selectedIndustryId) : undefined,
     business_type_id: selectedBusinessTypeId ? Number(selectedBusinessTypeId) : undefined,
+    activity_ids: selectedActivityIds || undefined,
   });
 
   const visible = licensesData?.data ?? [];
@@ -108,9 +135,12 @@ export const BrowseLicenses = () => {
     setSelectedLocationId("");
     setSelectedIndustryId("");
     setSelectedBusinessTypeId("");
+    setSelectedActivityIds("");
     setQ("");
     setDebouncedQ("");
     setPage(1);
+    // Also drop the query string, or a later advanced search would resurrect it.
+    if (Array.from(searchParams.keys()).length > 0) setSearchParams(new URLSearchParams());
   };
 
   const activeFilters = [
@@ -118,6 +148,7 @@ export const BrowseLicenses = () => {
     ...(selectedLocationId ? [{ group: "Jurisdiction", name: locationsList.find((l) => String(l.id) === selectedLocationId)?.name || selectedLocationId, clear: () => { setSelectedLocationId(""); setPage(1); } }] : []),
     ...(selectedIndustryId ? [{ group: "Industry", name: industriesList.find((i) => String(i.id) === selectedIndustryId)?.name || selectedIndustryId, clear: () => { setSelectedIndustryId(""); setPage(1); } }] : []),
     ...(selectedBusinessTypeId ? [{ group: "Business Type", name: businessTypesList.find((b) => String(b.id) === selectedBusinessTypeId)?.name || selectedBusinessTypeId, clear: () => { setSelectedBusinessTypeId(""); setPage(1); } }] : []),
+    ...(selectedActivityIds ? [{ group: "Activities", name: `${selectedActivityIds.split(",").filter(Boolean).length} selected`, clear: () => { setSelectedActivityIds(""); setPage(1); } }] : []),
   ];
 
   // pagination window
@@ -201,6 +232,18 @@ export const BrowseLicenses = () => {
               </div>
             )}
           </div>
+
+          {/* Cascading advanced search — Industry narrows Business Type, which narrows Activities */}
+          <AdvancedLicenseSearch
+            className="mb-4"
+            values={{
+              location_id: selectedLocationId,
+              industry_id: selectedIndustryId,
+              business_type_id: selectedBusinessTypeId,
+              activity_ids: selectedActivityIds,
+            }}
+            onApply={applyAdvancedSearch}
+          />
 
           {/* Search bar */}
           <div className="flex items-center gap-3 bg-white border border-sand-200 rounded-full px-4 h-12 mb-4 shadow-soft">

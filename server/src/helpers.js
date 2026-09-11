@@ -49,10 +49,14 @@ export function buildPaginatedQuery(table, options = {}) {
     }
   }
 
-  // Extra WHERE clauses (e.g. subqueries for junction table filters)
+  // Extra WHERE clauses (e.g. subqueries for junction table filters).
+  // extraParams[i] pairs with extraWhere[i]; use an array for a clause that needs
+  // several placeholders (e.g. IN (?,?,?)) or an empty array for one that needs none.
   for (let i = 0; i < extraWhere.length; i++) {
     whereClauses.push(extraWhere[i]);
-    if (extraParams[i] !== undefined) params.push(extraParams[i]);
+    const extra = extraParams[i];
+    if (Array.isArray(extra)) params.push(...extra);
+    else if (extra !== undefined) params.push(extra);
   }
 
   const whereSQL = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
@@ -109,7 +113,9 @@ export function error(res, message, status = 400) {
 export function parsePagination(query) {
   return {
     page: Math.max(1, parseInt(query.page) || 1),
-    per_page: Math.min(100, Math.max(1, parseInt(query.per_page) || 25)),
+    // Cap high enough that reference tables used to populate filter dropdowns
+    // (jurisdictions, business types, activities) can be fetched in one request.
+    per_page: Math.min(500, Math.max(1, parseInt(query.per_page) || 25)),
     search: query.search || '',
     orderBy: query.order_by || 'id',
     orderDir: query.order_dir || 'DESC',

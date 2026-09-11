@@ -8,9 +8,35 @@ const router = Router();
 router.get('/', async (req, res) => {
   try {
     const pagination = parsePagination(req.query);
+
+    // Business type filter: Activities → BusinessTypes via businesstypes_activities
+    const extraWhere = [];
+    const extraParams = [];
+    if (req.query.business_type_id) {
+      extraWhere.push(
+        `id IN (SELECT businessactivity_id FROM businesstypes_activities WHERE businesstype_id = ?)`
+      );
+      extraParams.push(req.query.business_type_id);
+    }
+    // has_licenses=1 drops options that lead nowhere (no published licenses), so
+    // cascading filter dropdowns never offer a dead end.
+    if (req.query.has_licenses) {
+      extraWhere.push(
+        `id IN (
+          SELECT DISTINCT la.businessactivity_id
+          FROM licenses_activities la
+          INNER JOIN businesslicense bl ON la.businesslicense_id = bl.id
+          WHERE bl.deleted = 0 AND bl.status = 1
+        )`
+      );
+      extraParams.push([]);
+    }
+
     const result = await executePaginatedQuery(pool, 'businessactivity', {
       ...pagination,
       searchColumns: ['name', 'description'],
+      extraWhere,
+      extraParams,
       orderBy: 'name',
       orderDir: 'ASC',
     });
@@ -20,7 +46,7 @@ router.get('/', async (req, res) => {
         `SELECT COUNT(DISTINCT bl.id) as count
          FROM businesslicense bl
          INNER JOIN licenses_activities la ON bl.id = la.businesslicense_id
-         WHERE la.businessactivity_id = ? AND bl.deleted = 0`,
+         WHERE la.businessactivity_id = ? AND bl.deleted = 0 AND bl.status = 1`,
         [act.id]
       );
       act.license_count = count;

@@ -46,6 +46,22 @@ router.get('/', async (req, res) => {
       );
       extraParams.push(req.query.business_type_id);
     }
+    // Activity filter: comma-separated ids, matching licenses linked to ANY of them
+    // (same OR semantics as the legacy advanced search's multi-select).
+    const activityIds = String(req.query.activity_ids || '')
+      .split(',')
+      .map((v) => parseInt(v, 10))
+      .filter(Number.isFinite);
+    if (activityIds.length > 0) {
+      extraWhere.push(
+        `id IN (
+          SELECT DISTINCT la.businesslicense_id
+          FROM licenses_activities la
+          WHERE la.businessactivity_id IN (${activityIds.map(() => '?').join(',')})
+        )`
+      );
+      extraParams.push(activityIds);
+    }
 
     const result = await executePaginatedQuery(pool, 'businesslicense', {
       ...pagination,

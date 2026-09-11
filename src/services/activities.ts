@@ -20,6 +20,8 @@ export interface ActivityListParams {
   search?: string;
   order_by?: string;
   order_dir?: string;
+  business_type_id?: number | string;
+  has_licenses?: number;
 }
 
 export const activityService = {

@@ -10,9 +10,6 @@ router.get('/', async (req, res) => {
     const pagination = parsePagination(req.query);
     const filters = { deleted: 0 };
     if (req.query.show_in_browse) filters.show_in_browse = req.query.show_in_browse;
-    if (req.query.industry_id) {
-      // Will be handled via extraWhere
-    }
 
     const extraWhere = [];
     const extraParams = [];
@@ -21,6 +18,20 @@ router.get('/', async (req, res) => {
         `id IN (SELECT businesstype_id FROM businesstypes_industries WHERE businessindustry_id = ?)`
       );
       extraParams.push(req.query.industry_id);
+    }
+    // has_licenses=1 drops business types with no published licenses, so cascading
+    // filter dropdowns never offer a dead end.
+    if (req.query.has_licenses) {
+      extraWhere.push(
+        `id IN (
+          SELECT DISTINCT bta.businesstype_id
+          FROM businesstypes_activities bta
+          INNER JOIN licenses_activities la ON bta.businessactivity_id = la.businessactivity_id
+          INNER JOIN businesslicense bl ON la.businesslicense_id = bl.id
+          WHERE bl.deleted = 0 AND bl.status = 1
+        )`
+      );
+      extraParams.push([]);
     }
 
     const result = await executePaginatedQuery(pool, 'businesstype', {

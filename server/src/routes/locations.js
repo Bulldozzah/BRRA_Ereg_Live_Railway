@@ -8,12 +8,33 @@ const router = Router();
 router.get('/', async (req, res) => {
   try {
     const pagination = parsePagination(req.query);
+
+    // has_licenses=1 drops jurisdictions with no published licenses, so cascading
+    // filter dropdowns never offer a dead end.
+    const extraWhere = [];
+    if (req.query.has_licenses) {
+      extraWhere.push(
+        `id IN (SELECT DISTINCT location_id FROM businesslicense WHERE deleted = 0 AND status = 1)`
+      );
+    }
+
     const result = await executePaginatedQuery(pool, 'businesslocation', {
       ...pagination,
       searchColumns: ['name'],
+      extraWhere,
       orderBy: 'name',
       orderDir: 'ASC',
     });
+
+    // Attach published license counts per location
+    for (const loc of result.data) {
+      const [[{ count }]] = await pool.query(
+        'SELECT COUNT(*) as count FROM businesslicense WHERE location_id = ? AND deleted = 0 AND status = 1',
+        [loc.id]
+      );
+      loc.license_count = count;
+    }
+
     // Attach category name to each row
     if (result.data && result.data.length > 0) {
       const parentIds = [...new Set(result.data.map((r) => r.parent).filter(Boolean))];

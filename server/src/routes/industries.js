@@ -11,10 +11,27 @@ router.get('/', async (req, res) => {
     const filters = {};
     if (req.query.show_in_browse) filters.show_in_browse = req.query.show_in_browse;
 
+    // has_licenses=1 drops industries with no published licenses, so cascading
+    // filter dropdowns never offer a dead end.
+    const extraWhere = [];
+    if (req.query.has_licenses) {
+      extraWhere.push(
+        `id IN (
+          SELECT DISTINCT bti.businessindustry_id
+          FROM businesstypes_industries bti
+          INNER JOIN businesstypes_activities bta ON bti.businesstype_id = bta.businesstype_id
+          INNER JOIN licenses_activities la ON bta.businessactivity_id = la.businessactivity_id
+          INNER JOIN businesslicense bl ON la.businesslicense_id = bl.id
+          WHERE bl.deleted = 0 AND bl.status = 1
+        )`
+      );
+    }
+
     const result = await executePaginatedQuery(pool, 'businessindustry', {
       ...pagination,
       searchColumns: ['name', 'description'],
       filters,
+      extraWhere,
       orderBy: 'name',
       orderDir: 'ASC',
     });

@@ -6,6 +6,11 @@ import type {
   ApiResponse,
 } from '@/types/database';
 
+export interface LocationWithCategory extends BusinessLocation {
+  license_count: number;
+  category_name: string | null;
+}
+
 export interface LocationDetail extends BusinessLocation {
   license_count: number;
   children: BusinessLocation[];
@@ -17,11 +22,12 @@ export interface LocationListParams {
   search?: string;
   order_by?: string;
   order_dir?: string;
+  has_licenses?: number;
 }
 
 export const locationService = {
   list(params: LocationListParams = {}) {
-    return api.get<PaginatedResponse<BusinessLocation>>('/locations', params as Record<string, string | number>);
+    return api.get<PaginatedResponse<LocationWithCategory>>('/locations', params as Record<string, string | number>);
   },
 
   getById(id: number | string) {

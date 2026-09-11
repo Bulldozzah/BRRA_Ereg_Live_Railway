@@ -32,6 +32,7 @@ export interface LicenseListParams {
   location_id?: number;
   industry_id?: number;
   business_type_id?: number;
+  activity_ids?: string;
   status?: string;
   stage_id?: number;
 }

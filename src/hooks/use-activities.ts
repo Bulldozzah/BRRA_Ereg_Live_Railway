@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { activityService, type ActivityListParams } from '@/services/activities';
 
-export function useActivities(params: ActivityListParams = {}) {
+export function useActivities(params: ActivityListParams = {}, options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: ['activities', params],
     queryFn: () => activityService.list(params),
+    enabled: options.enabled ?? true,
   });
 }
 

@@ -21,6 +21,7 @@ export interface IndustryListParams {
   order_by?: string;
   order_dir?: string;
   show_in_browse?: number;
+  has_licenses?: number;
 }
 
 export const industryService = {

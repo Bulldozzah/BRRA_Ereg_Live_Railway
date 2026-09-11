@@ -33,6 +33,7 @@ export interface BusinessTypeListParams {
   order_dir?: string;
   show_in_browse?: number;
   industry_id?: number | string;
+  has_licenses?: number;
 }
 
 export const businessTypeService = {

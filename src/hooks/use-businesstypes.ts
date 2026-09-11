@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { businessTypeService, type BusinessTypeListParams } from '@/services/businesstypes';
 
-export function useBusinessTypes(params: BusinessTypeListParams = {}) {
+export function useBusinessTypes(params: BusinessTypeListParams = {}, options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: ['businesstypes', params],
     queryFn: () => businessTypeService.list(params),
+    enabled: options.enabled ?? true,
   });
 }
 

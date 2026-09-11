@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, FileText, Building2, MapPin, Briefcase, MessageSquare, Calendar, Loader2, Layers } from "lucide-react";
+import { ArrowRight, FileText, Building2, MapPin, Briefcase, MessageSquare, Calendar, Loader2, Layers, Search } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
+import { AdvancedLicenseSearch } from "@/components/search/AdvancedLicenseSearch";
 import { EregistryHero } from "@/components/ui/eregistry-hero";
 import { HeroSlideshow } from "@/components/ui/HeroSlideshow";
 import heroAgriculture from "@/assets/hero/agriculture.jpg";
@@ -52,6 +54,13 @@ const sectorCodes: Record<string, string> = {
 
 const Index = () => {
   const navigate = useNavigate();
+  const [query, setQuery] = useState("");
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = query.trim();
+    navigate(q ? `/browse/licenses?q=${encodeURIComponent(q)}` : "/browse/licenses");
+  };
   const { data: industriesData } = useIndustries({ per_page: 4, order_by: 'name', order_dir: 'ASC' });
   const { data: regulationsData } = useRegulations({ per_page: 2, order_by: 'id', order_dir: 'DESC' });
   const { data: countsData } = useHomepageCounts();
@@ -154,6 +163,27 @@ const Index = () => {
             );
           })}
         </div>
+
+        {/* Keyword search — jumps straight to the license directory with results */}
+        <form
+          onSubmit={handleSearch}
+          className="mt-4 flex items-center gap-3 bg-white border border-sand-200 rounded-full pl-4 pr-1.5 h-14 shadow-card"
+        >
+          <Search size={18} className="text-muted-foreground shrink-0" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search licences by name or keyword…"
+            aria-label="Search licences by name or keyword"
+            className="flex-1 bg-transparent outline-none text-sm min-w-0"
+          />
+          <button
+            type="submit"
+            className="inline-flex items-center gap-2 px-5 h-11 rounded-full bg-copper-500 text-white font-semibold text-sm hover:bg-copper-600 transition-colors shrink-0"
+          >
+            Search <ArrowRight size={14} />
+          </button>
+        </form>
       </section>
 
 
@@ -169,6 +199,8 @@ const Index = () => {
               View all industries <ArrowRight size={14} />
             </Link>
           </div>
+
+          <AdvancedLicenseSearch />
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {sectors.map((s) => (
